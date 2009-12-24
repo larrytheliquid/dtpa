@@ -45,8 +45,18 @@ _!_ : {n : Nat}{A : Set} -> Vec A n -> Fin n -> A
 (x :: _) ! fzero = x
 (_ :: xs) ! (fsuc i) = xs ! i
 
-testFin : Fin (suc (suc zero))
+testFin : Fin (suc (suc (suc zero)))
 testFin = fsuc fzero
 
 test! : P ((zero :: suc zero :: []) ! (fsuc fzero)) -> P (suc zero)
 test! x = x
+
+_◦_ : {A : Set}{B : A -> Set}{C : (x : A) -> B x -> Set} 
+      (f : {x : A}(y : B x) -> C x y)(g : (x : A) -> B x) 
+      (x : A) -> C x (g x)
+(f ◦ g) x = f (g x)
+
+tabulate : {n : Nat}{A : Set} -> (Fin n -> A) -> Vec A n 
+tabulate {zero} _ = [] 
+tabulate {suc _} f = f fzero :: tabulate (f ◦ fsuc)
+
