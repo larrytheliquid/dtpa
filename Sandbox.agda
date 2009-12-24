@@ -2,6 +2,15 @@ module Sandbox where
 
 data P : {A : Set} -> A -> Set where
 
+data Bool : Set where
+  true : Bool
+  false : Bool
+
+infixr 0 _::_ 
+data List (A : Set) : Set where 
+  [] : List A 
+  _::_ : A -> List A -> List A  
+
 data Nat : Set where
   zero : Nat
   suc : Nat -> Nat
@@ -34,8 +43,6 @@ data Vec (A : Set) : Nat -> Set where
   [] : Vec A zero
   _::_ : {n : Nat} -> A -> Vec A n -> Vec A (suc n)
        
-infixr 9 _::_
-
 data Fin : Nat -> Set where
   fzero : {n : Nat} -> Fin (suc n)
   fsuc : {n : Nat} -> Fin n -> Fin (suc n)
@@ -60,3 +67,24 @@ tabulate : {n : Nat}{A : Set} -> (Fin n -> A) -> Vec A n
 tabulate {zero} _ = [] 
 tabulate {suc _} f = f fzero :: tabulate (f ◦ fsuc)
 
+data False : Set where 
+record True : Set where
+
+isTrue : Bool -> Set 
+isTrue true = True 
+isTrue false = False
+
+_<_ : Nat -> Nat -> Bool 
+_ < zero = false 
+zero < suc _ = true 
+suc m < suc n = m < n 
+
+length : {A : Set} -> List A -> Nat 
+length [] = zero 
+length (_ :: xs) = suc (length xs) 
+
+lookup : {A : Set}(xs : List A)(n : Nat)
+         {_ : isTrue (n < length xs)} -> A 
+lookup [] _ {()}
+lookup (x :: _) zero = x 
+lookup (_ :: xs) (suc n) {p} = lookup xs n {p}
