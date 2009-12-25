@@ -95,10 +95,6 @@ testLookup x = x
 
 data _==_ {A : Set}(x : A) : A -> Set where
   refl : x == x
-  escape : {y : A} -> x == y
-
-testEquals : zero == suc zero
-testEquals = escape
 
 data _≤_ : Nat -> Nat -> Set where
   leq-zero : {n : Nat} -> zero ≤ n
@@ -113,3 +109,15 @@ data _≠_ : Nat -> Nat -> Set where
   s≠z : {n : Nat} -> suc n ≠ zero
   s≠s : {m n : Nat} -> m ≠ n -> suc m ≠ suc n
 
+-- This contains the universe codes + conversion function
+data Equal? (n m : Nat) : Set where
+  eq : n == m -> Equal? n m
+  neq : n ≠ m -> Equal? n m
+
+equal? : (n m : Nat) -> Equal? n m
+equal? zero zero = eq refl
+equal? zero (suc m) = neq z≠s
+equal? (suc n) zero = neq s≠z
+equal? (suc n) (suc m) with equal? n m
+equal? (suc n) (suc .n) | eq refl = eq refl
+equal? (suc n) (suc m) | neq p = neq (s≠s p)
