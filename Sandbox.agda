@@ -88,3 +88,28 @@ lookup : {A : Set}(xs : List A)(n : Nat)
 lookup [] _ {()}
 lookup (x :: _) zero = x 
 lookup (_ :: xs) (suc n) {p} = lookup xs n {p}
+
+testLookup : P (lookup (zero :: suc zero :: []) (suc zero))
+             -> P (suc zero)
+testLookup x = x
+
+data _==_ {A : Set}(x : A) : A -> Set where
+  refl : x == x
+  escape : {y : A} -> x == y
+
+testEquals : zero == suc zero
+testEquals = escape
+
+data _≤_ : Nat -> Nat -> Set where
+  leq-zero : {n : Nat} -> zero ≤ n
+  leq-suc : {m n : Nat} -> m ≤ n -> suc m ≤ suc n
+
+leq-trans : {l m n : Nat} -> l ≤ m -> m ≤ n -> l ≤ n
+leq-trans leq-zero _ = leq-zero
+leq-trans (leq-suc p) (leq-suc q) = leq-suc (leq-trans p q)
+
+data _≠_ : Nat -> Nat -> Set where
+  z≠s : {n : Nat} -> zero ≠ suc n
+  s≠z : {n : Nat} -> suc n ≠ zero
+  s≠s : {m n : Nat} -> m ≠ n -> suc m ≠ suc n
+
