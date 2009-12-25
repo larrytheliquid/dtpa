@@ -154,3 +154,19 @@ lem-plus-zero : ∀ n -> n + zero == n
 lem-plus-zero zero = refl
 lem-plus-zero (suc n) with n + zero | lem-plus-zero n
 ... | .n | refl = refl
+
+Matrix : Set -> Nat -> Nat -> Set
+Matrix A n m = Vec (Vec A n) m
+
+vec : {n : Nat}{A : Set} -> A -> Vec A n
+vec {zero} _ = []
+vec {suc _} x = x :: vec x
+
+infixl 90 _$_ 
+_$_ : {n : Nat}{A B : Set} -> Vec (A -> B) n -> Vec A n -> Vec B n
+[] $ [] = []
+(f :: fs) $ (x :: xs) = f x :: (fs $ xs)
+
+transpose : ∀ {A n m} -> Matrix A n m -> Matrix A m n
+transpose xss = {!!}
+
