@@ -124,6 +124,9 @@ equal? (suc n) (suc .n) | eq refl = eq refl
 equal? (suc _) (suc _) | neq p = neq (s≠s p)
 
 infix 7 _⊆_
+-- subset means each lhs element can be dropped or
+-- kept, but you do not have an element that
+-- is kept on lhs and dropped on rhs
 data _⊆_ {A : Set} : List A -> List A -> Set where
   stop : [] ⊆ []
   keep : ∀ {x xs ys} -> xs ⊆ ys -> x :: xs ⊆ x :: ys
@@ -134,3 +137,20 @@ filter _ [] = []
 filter p (x :: xs) with p x 
 ... | true = x :: filter p xs 
 ... | false = filter p xs
+
+lem-filter : {A : Set}(p : A -> Bool)(xs : List A) ->
+             filter p xs ⊆ xs
+lem-filter _ [] = stop
+lem-filter p (x :: xs) with p x
+... | true = keep (lem-filter p xs)
+... | false = drop (lem-filter p xs)
+
+infix 90 _+_
+_+_ : Nat -> Nat -> Nat
+zero + m = m
+suc n + m = suc (n + m)
+
+lem-plus-zero : ∀ n -> n + zero == n
+lem-plus-zero zero = refl
+lem-plus-zero (suc n) with n + zero | lem-plus-zero n
+... | .n | refl = refl
