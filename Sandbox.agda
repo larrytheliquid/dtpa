@@ -6,7 +6,7 @@ data Bool : Set where
   true : Bool
   false : Bool
 
-infixr 0 _::_ 
+infixr 9 _::_ 
 data List (A : Set) : Set where 
   [] : List A 
   _::_ : A -> List A -> List A  
@@ -93,9 +93,7 @@ testLookup : P (lookup (zero :: suc zero :: []) (suc zero))
              -> P (suc zero)
 testLookup x = x
 
-data _==_ {A : Set}(x : A) : A -> Set where
-  refl : x == x
-
+-- meaning of ≤ inductively defined at base case 0
 data _≤_ : Nat -> Nat -> Set where
   leq-zero : {n : Nat} -> zero ≤ n
   leq-suc : {m n : Nat} -> m ≤ n -> suc m ≤ suc n
@@ -103,6 +101,9 @@ data _≤_ : Nat -> Nat -> Set where
 leq-trans : {l m n : Nat} -> l ≤ m -> m ≤ n -> l ≤ n
 leq-trans leq-zero _ = leq-zero
 leq-trans (leq-suc p) (leq-suc q) = leq-suc (leq-trans p q)
+
+data _==_ {A : Set}(x : A) : A -> Set where
+  refl : x == x
 
 data _≠_ : Nat -> Nat -> Set where
   z≠s : {n : Nat} -> zero ≠ suc n
@@ -116,8 +117,20 @@ data Equal? (n m : Nat) : Set where
 
 equal? : (n m : Nat) -> Equal? n m
 equal? zero zero = eq refl
-equal? zero (suc m) = neq z≠s
-equal? (suc n) zero = neq s≠z
+equal? zero (suc _) = neq z≠s
+equal? (suc _) zero = neq s≠z
 equal? (suc n) (suc m) with equal? n m
 equal? (suc n) (suc .n) | eq refl = eq refl
-equal? (suc n) (suc m) | neq p = neq (s≠s p)
+equal? (suc _) (suc _) | neq p = neq (s≠s p)
+
+infix 7 _⊆_
+data _⊆_ {A : Set} : List A -> List A -> Set where
+  stop : [] ⊆ []
+  keep : ∀ {x xs ys} -> xs ⊆ ys -> x :: xs ⊆ x :: ys
+  drop : ∀ {xs y ys} -> xs ⊆ ys -> xs ⊆ y :: ys
+
+filter : {A : Set} -> (A -> Bool) -> List A -> List A 
+filter _ [] = [] 
+filter p (x :: xs) with p x 
+... | true = x :: filter p xs 
+... | false = filter p xs
