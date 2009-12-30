@@ -6,7 +6,7 @@ data Bool : Set where
   true : Bool
   false : Bool
 
-infixr 9 _::_ 
+infixr 40 _::_
 data List (A : Set) : Set where 
   [] : List A 
   _::_ : A -> List A -> List A  
@@ -42,11 +42,18 @@ testInv x = x
 data Vec (A : Set) : Nat -> Set where
   [] : Vec A zero
   _::_ : {n : Nat} -> A -> Vec A n -> Vec A (suc n)
+
+head : {A : Set}{n : Nat} -> Vec A (suc n) -> A
+head (x :: _) = x
+
+tail : {A : Set}{n : Nat} -> Vec A (suc n) -> Vec A n
+tail (_ :: xs) = xs
        
 data Fin : Nat -> Set where
   fzero : {n : Nat} -> Fin (suc n)
   fsuc : {n : Nat} -> Fin n -> Fin (suc n)
 
+infixl 90 _!_
 _!_ : {n : Nat}{A : Set} -> Vec A n -> Fin n -> A
 [] ! ()
 (x :: _) ! fzero = x
@@ -123,7 +130,7 @@ equal? (suc n) (suc m) with equal? n m
 equal? (suc n) (suc .n) | eq refl = eq refl
 equal? (suc _) (suc _) | neq p = neq (s≠s p)
 
-infix 7 _⊆_
+infix 20 _⊆_
 -- subset means each lhs element can be dropped or
 -- kept, but you do not have an element that
 -- is kept on lhs and dropped on rhs
@@ -145,7 +152,7 @@ lem-filter p (x :: xs) with p x
 ... | true = keep (lem-filter p xs)
 ... | false = drop (lem-filter p xs)
 
-infix 90 _+_
+infixl 40 _+_ 
 _+_ : Nat -> Nat -> Nat
 zero + m = m
 suc n + m = suc (n + m)
@@ -154,9 +161,6 @@ lem-plus-zero : ∀ n -> n + zero == n
 lem-plus-zero zero = refl
 lem-plus-zero (suc n) with n + zero | lem-plus-zero n
 ... | .n | refl = refl
-
-Matrix : Set -> Nat -> Nat -> Set
-Matrix A n m = Vec (Vec A n) m
 
 vec : {n : Nat}{A : Set} -> A -> Vec A n
 vec {zero} _ = []
@@ -167,6 +171,18 @@ _$_ : {n : Nat}{A B : Set} -> Vec (A -> B) n -> Vec A n -> Vec B n
 [] $ [] = []
 (f :: fs) $ (x :: xs) = f x :: (fs $ xs)
 
-transpose : ∀ {A n m} -> Matrix A n m -> Matrix A m n
-transpose xss = {!!}
+Matrix : Set -> Nat -> Nat -> Set
+Matrix A n m = Vec (Vec A n) m
 
+vmap : {A B : Set}{n : Nat} -> (A -> B) -> Vec A n -> Vec B n
+vmap f xss = vec f $ xss
+
+-- transpose : ∀ {A n m} → Matrix A n m → Matrix A m n
+-- transpose [] = vec []
+-- transpose ([] :: _) = []
+-- transpose xss with vec (λ x :: _ → x) $ xss | vec (λ _ :: xs → xs) $ xss
+-- ... | column | remainder = column :: transpose remainder
+
+-- lem-!-tab : ∀{A n}(f : Fin n -> A)(i : Fin n) -> 
+--             tabulate f ! i == f i 
+-- lem-!-tab f i = {! !}
