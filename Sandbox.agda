@@ -183,54 +183,7 @@ tabulate : {n : Nat}{A : Set} -> (Fin n -> A) -> Vec A n
 tabulate {zero} _ = []
 tabulate {suc _} f = f fzero :: tabulate (f ◦ fsuc)
 
--- you still do case analysis on inductive types
--- but otherwise use unification instead of equational logic
 lem-!-tab : ∀{n A}(f : Fin n -> A)(i : Fin n) ->
             tabulate f ! i == f i
 lem-!-tab f fzero = refl
--- ?0 : tabulate ((λ {.x} → f) ◦ fsuc) ! i == f (fsuc i)
--- lem-!-tab f (fsuc i) with tabulate f
--- ... | x :: xs with _!_ xs
--- ... | f' with tabulate f' ! i | lem-!-tab f' i
--- ... | .(f' i) | refl = {!!}
-
--- lem-!-tab f (fsuc i) with tabulate f
--- ... | x :: xs with _!_ xs
--- ... | f' with tabulate f' ! i | lem-!-tab f' i | x | lem-!-tab f fzero
--- ... | .(f' i) | refl | .(f fzero) | refl = {!!}
-
--- lem-!-tab f (fsuc i) with tabulate f
--- ... | x :: xs with xs | _!_ xs | i
--- ... | [] | _ | ()
--- ... | _ | f' | _ with tabulate f' ! i | lem-!-tab f' i
--- ... | .(f' i) | refl = {!!}
-
--- ?0 : tabulate f ! fsuc i == f (fsuc i)
--- lem-!-tab f (fsuc i) with tabulate (f ◦ fsuc)
--- ... | [] = {!!}
--- ... | x :: xs with i | (x :: xs) ! i
--- ... | fzero | _ = {!!}
--- ... | fsuc i' | _ = {!!}
-
--- lem-!-tab f (fsuc i) with tabulate f
--- ... | x :: xs with x | lem-!-tab (_!_ xs) i
--- ... | .(f fzero) | refl = {!!}
-
--- lem-!-tab f (fsuc i) with tabulate f
--- ... | _ :: xs with _!_ xs
--- ... | f' with f' i == xs
--- ... | a = {!!}
-
--- lem-!-tab f (fsuc i) with tabulate f
--- ... | _ :: xs  with _!_ xs
--- ... | f' = {!!}
-
--- lem-!-tab f (fsuc i) with i | _!_ (tabulate f) | lem-!-tab f i
--- ... | fsuc _ | .f | refl = refl
-
--- lem-!-tab f (fsuc i) with tabulate f
--- ... | _ :: xs with xs ! i | lem-!-tab f i
--- ... | a | refl = {!!}
-
--- lem-!-tab f (fsuc i) with tabulate f ! fzero
--- ... | (f i) = ?0
+lem-!-tab f (fsuc i) = lem-!-tab (f ◦ fsuc) i
