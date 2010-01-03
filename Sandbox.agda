@@ -105,28 +105,6 @@ equal? (suc n) (suc m) with equal? n m
 equal? (suc n) (suc .n) | eq refl = eq refl
 equal? (suc _) (suc _) | neq p = neq (s≠s p)
 
-infix 20 _⊆_
--- subset means each lhs element can be dropped or
--- kept, but you do not have an element that
--- is kept on lhs and dropped on rhs
-data _⊆_ {A : Set} : List A -> List A -> Set where
-  stop : [] ⊆ []
-  keep : ∀ {x xs ys} -> xs ⊆ ys -> x :: xs ⊆ x :: ys
-  drop : ∀ {xs y ys} -> xs ⊆ ys -> xs ⊆ y :: ys
-
-filter : {A : Set} -> (A -> Bool) -> List A -> List A 
-filter _ [] = [] 
-filter p (x :: xs) with p x 
-... | true = x :: filter p xs 
-... | false = filter p xs
-
-lem-filter : {A : Set}(p : A -> Bool)(xs : List A) ->
-             filter p xs ⊆ xs
-lem-filter _ [] = stop
-lem-filter p (x :: xs) with p x
-... | true = keep (lem-filter p xs)
-... | false = drop (lem-filter p xs)
-
 infixl 40 _+_ 
 _+_ : Nat -> Nat -> Nat
 zero + m = m
@@ -187,3 +165,36 @@ lem-!-tab : ∀{n A}(f : Fin n -> A)(i : Fin n) ->
             tabulate f ! i == f i
 lem-!-tab f fzero = refl
 lem-!-tab f (fsuc i) = lem-!-tab (f ◦ fsuc) i
+
+infix 20 _⊆_
+-- subset means each lhs element can be dropped or
+-- kept, but you do not have an element that
+-- is kept on lhs and dropped on rhs
+data _⊆_ {A : Set} : List A -> List A -> Set where
+  stop : [] ⊆ []
+  keep : ∀ {x xs ys} -> xs ⊆ ys -> x :: xs ⊆ x :: ys
+  drop : ∀ {xs y ys} -> xs ⊆ ys -> xs ⊆ y :: ys
+
+filter : {A : Set} -> (A -> Bool) -> List A -> List A 
+filter _ [] = [] 
+filter p (x :: xs) with p x 
+... | true = x :: filter p xs 
+... | false = filter p xs
+
+lem-filter : {A : Set}(p : A -> Bool)(xs : List A) ->
+             filter p xs ⊆ xs
+lem-filter _ [] = stop
+lem-filter p (x :: xs) with p x
+... | true = keep (lem-filter p xs)
+... | false = drop (lem-filter p xs)
+
+⊆-refl : {A : Set}{xs : List A} -> xs ⊆ xs
+⊆-refl {xs = []} = stop
+⊆-refl {xs = _ :: xs'} = keep (⊆-refl {xs = xs'})
+
+⊆-trans : {A : Set}{xs ys zs : List A} -> xs ⊆ ys -> ys ⊆ zs -> xs ⊆ zs
+⊆-trans stop stop = stop
+⊆-trans stop (drop q) = drop (⊆-trans stop q)
+⊆-trans (keep p) (keep q) = keep (⊆-trans p q)
+⊆-trans (keep p) (drop q) = drop {!!}
+⊆-trans p q = {!!}
