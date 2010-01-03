@@ -48,31 +48,6 @@ head (x :: _) = x
 
 tail : {A : Set}{n : Nat} -> Vec A (suc n) -> Vec A n
 tail (_ :: xs) = xs
-       
-data Fin : Nat -> Set where
-  fzero : {n : Nat} -> Fin (suc n)
-  fsuc : {n : Nat} -> Fin n -> Fin (suc n)
-
-infixl 90 _!_
-_!_ : {n : Nat}{A : Set} -> Vec A n -> Fin n -> A
-[] ! ()
-(x :: _) ! fzero = x
-(_ :: xs) ! (fsuc i) = xs ! i
-
-testFin : Fin (suc (suc (suc zero)))
-testFin = fsuc fzero
-
-test! : P ((zero :: suc zero :: []) ! (fsuc fzero)) -> P (suc zero)
-test! x = x
-
-_◦_ : {A : Set}{B : A -> Set}{C : (x : A) -> B x -> Set} 
-      (f : {x : A}(y : B x) -> C x y)(g : (x : A) -> B x) 
-      (x : A) -> C x (g x)
-(f ◦ g) x = f (g x)
-
-tabulate : {n : Nat}{A : Set} -> (Fin n -> A) -> Vec A n 
-tabulate {zero} _ = [] 
-tabulate {suc _} f = f fzero :: tabulate (f ◦ fsuc)
 
 data False : Set where 
 record True : Set where
@@ -183,6 +158,79 @@ vmap f xss = vec f $ xss
 -- transpose xss with vec (λ x :: _ → x) $ xss | vec (λ _ :: xs → xs) $ xss
 -- ... | column | remainder = column :: transpose remainder
 
--- lem-!-tab : ∀{A n}(f : Fin n -> A)(i : Fin n) -> 
---             tabulate f ! i == f i 
--- lem-!-tab f i = {! !}
+data Fin : Nat -> Set where
+  fzero : {n : Nat} -> Fin (suc n)
+  fsuc : {n : Nat} -> Fin n -> Fin (suc n)
+
+infixl 90 _!_
+_!_ : {n : Nat}{A : Set} -> Vec A n -> Fin n -> A
+[] ! ()
+(x :: _) ! fzero = x
+(_ :: xs) ! (fsuc i) = xs ! i
+
+testFin : Fin (suc (suc (suc zero)))
+testFin = fsuc fzero
+
+test! : P ((zero :: suc zero :: []) ! (fsuc fzero)) -> P (suc zero)
+test! x = x
+
+_◦_ : {A : Set}{B : A -> Set}{C : (x : A) -> B x -> Set} 
+      (f : {x : A}(y : B x) -> C x y)(g : (x : A) -> B x) 
+      (x : A) -> C x (g x)
+(f ◦ g) x = f (g x)
+
+tabulate : {n : Nat}{A : Set} -> (Fin n -> A) -> Vec A n
+tabulate {zero} _ = []
+tabulate {suc _} f = f fzero :: tabulate (f ◦ fsuc)
+
+-- you still do case analysis on inductive types
+-- but otherwise use unification instead of equational logic
+lem-!-tab : ∀{n A}(f : Fin n -> A)(i : Fin n) ->
+            tabulate f ! i == f i
+lem-!-tab f fzero = refl
+-- ?0 : tabulate ((λ {.x} → f) ◦ fsuc) ! i == f (fsuc i)
+-- lem-!-tab f (fsuc i) with tabulate f
+-- ... | x :: xs with _!_ xs
+-- ... | f' with tabulate f' ! i | lem-!-tab f' i
+-- ... | .(f' i) | refl = {!!}
+
+-- lem-!-tab f (fsuc i) with tabulate f
+-- ... | x :: xs with _!_ xs
+-- ... | f' with tabulate f' ! i | lem-!-tab f' i | x | lem-!-tab f fzero
+-- ... | .(f' i) | refl | .(f fzero) | refl = {!!}
+
+-- lem-!-tab f (fsuc i) with tabulate f
+-- ... | x :: xs with xs | _!_ xs | i
+-- ... | [] | _ | ()
+-- ... | _ | f' | _ with tabulate f' ! i | lem-!-tab f' i
+-- ... | .(f' i) | refl = {!!}
+
+-- ?0 : tabulate f ! fsuc i == f (fsuc i)
+-- lem-!-tab f (fsuc i) with tabulate (f ◦ fsuc)
+-- ... | [] = {!!}
+-- ... | x :: xs with i | (x :: xs) ! i
+-- ... | fzero | _ = {!!}
+-- ... | fsuc i' | _ = {!!}
+
+-- lem-!-tab f (fsuc i) with tabulate f
+-- ... | x :: xs with x | lem-!-tab (_!_ xs) i
+-- ... | .(f fzero) | refl = {!!}
+
+-- lem-!-tab f (fsuc i) with tabulate f
+-- ... | _ :: xs with _!_ xs
+-- ... | f' with f' i == xs
+-- ... | a = {!!}
+
+-- lem-!-tab f (fsuc i) with tabulate f
+-- ... | _ :: xs  with _!_ xs
+-- ... | f' = {!!}
+
+-- lem-!-tab f (fsuc i) with i | _!_ (tabulate f) | lem-!-tab f i
+-- ... | fsuc _ | .f | refl = refl
+
+-- lem-!-tab f (fsuc i) with tabulate f
+-- ... | _ :: xs with xs ! i | lem-!-tab f i
+-- ... | a | refl = {!!}
+
+-- lem-!-tab f (fsuc i) with tabulate f ! fzero
+-- ... | (f i) = ?0
