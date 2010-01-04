@@ -198,4 +198,4 @@ lem-filter p (x :: xs) with p x
 ⊆-trans (keep p) (keep q) = keep (⊆-trans p q)
 ⊆-trans (keep p) (drop q) = drop (⊆-trans (keep p) q)
 ⊆-trans (drop p) (keep q) = drop (⊆-trans p q)
-⊆-trans (drop p) (drop q) = drop (⊆-trans p {!!})
+⊆-trans (drop p) (drop q) = drop (⊆-trans (drop p) q)
