@@ -221,3 +221,14 @@ lem-forget : {A : Set}{xs : List A}(zs : SubList xs) ->
 lem-forget [] = stop
 lem-forget (_ :: zs) = keep (lem-forget zs)
 lem-forget (skip zs) = drop (lem-forget zs)
+
+filter′ : {A : Set} -> (A -> Bool) -> (xs : List A) -> SubList xs
+filter′ _ [] = []
+filter′ p (x :: xs) with p x
+... | true = x :: filter′ p xs
+... | false = skip (filter′ p xs)
+
+complement : {A : Set}{xs : List A} -> SubList xs -> SubList xs
+complement [] = []
+complement (z :: zs) = skip (complement zs)
+complement (skip {x} zs) = x :: complement zs
