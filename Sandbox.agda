@@ -213,5 +213,11 @@ data SubList {A : Set} : List A -> Set where
 
 forget : {A : Set}{xs : List A} -> SubList xs -> List A
 forget [] = []
-forget (x :: xs) = x :: forget xs
-forget (skip xs) = forget xs
+forget (x :: zs) = x :: forget zs
+forget (skip zs) = forget zs
+
+lem-forget : {A : Set}{xs : List A}(zs : SubList xs) -> 
+             forget zs ⊆ xs
+lem-forget [] = stop
+lem-forget (_ :: zs) = keep (lem-forget zs)
+lem-forget (skip zs) = drop (lem-forget zs)
