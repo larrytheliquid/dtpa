@@ -181,6 +181,12 @@ filter p (x :: xs) with p x
 ... | true = x :: filter p xs 
 ... | false = filter p xs
 
+test-⊆-contained : zero :: [] ⊆ suc (suc zero) :: suc zero :: zero :: []
+test-⊆-contained = drop (drop (keep stop))
+
+test-⊆-scattered : suc zero :: [] ⊆ suc (suc zero) :: suc zero :: zero :: []
+test-⊆-scattered = drop (keep (drop stop))
+
 lem-filter : {A : Set}(p : A -> Bool)(xs : List A) ->
              filter p xs ⊆ xs
 lem-filter _ [] = stop
