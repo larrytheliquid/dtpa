@@ -199,3 +199,11 @@ lem-filter p (x :: xs) with p x
 ⊆-trans (keep p) (drop q) = drop (⊆-trans (keep p) q)
 ⊆-trans (drop p) (keep q) = drop (⊆-trans p q)
 ⊆-trans (drop p) (drop q) = drop (⊆-trans (drop p) q)
+
+data SubList {A : Set} : List A -> Set where 
+  [] : SubList [] 
+  _::_ : forall x {xs} -> SubList xs -> SubList (x :: xs) 
+  skip : forall {x xs} -> SubList xs -> SubList (x :: xs)
+
+forget : {A : Set}{xs : List A} -> SubList xs -> List A
+forget s = {! !}
