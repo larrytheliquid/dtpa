@@ -1,4 +1,4 @@
-module Sandbox where
+module AgdaBasics where
 
 data P : {A : Set} -> A -> Set where
 
