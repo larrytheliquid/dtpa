@@ -56,3 +56,23 @@ find₁ p (x ∷ ._) | it false _ | found xs y py ys =
   found (x ∷ xs) y py ys
 find₁ p (x ∷ xs) | it false p′ | not-found npxs =
   not-found (falseIsFalse p′ :all: npxs)
+
+infix 4 _∈_
+data _∈_ {A : Set}(x : A) : List A → Set where
+  hd : ∀ {xs} → x ∈ x ∷ xs
+  tl : ∀ {y xs} → x ∈ xs → x ∈ y ∷ xs
+
+index : ∀ {A}{x : A}{xs} → x ∈ xs → ℕ
+index hd = zero
+index (tl p) = suc (index p)
+
+data Lookup {A : Set}(xs : List A) : ℕ → Set where 
+  inside : (x : A)(p : x ∈ xs) → Lookup xs (index p) 
+  outside : (m : ℕ) → Lookup xs (length xs + m)
+
+_!_ : {A : Set}(xs : List A)(n : ℕ) → Lookup xs n
+[] ! n = outside n
+(x ∷ _) ! zero = inside x hd
+(_ ∷ xs) ! suc n with xs ! n
+(_ ∷ xs) ! suc .(length xs + n) | outside n = outside n
+(_ ∷ _) ! suc .(index p) | inside n p = inside n (tl p)
